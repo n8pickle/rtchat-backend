@@ -7,7 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication;
 using Data.Models;
 
 
@@ -28,20 +27,18 @@ namespace rtchat_backend
 
 			services.AddEntityFrameworkMySql()
 				.AddDbContext<MyDbContext>(options => options.UseMySql(connectionString, new MySqlServerVersion(new Version(10, 4, 13))));
+
 			services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<MyDbContext>().AddDefaultTokenProviders();
-			services.AddIdentityServer()
-				.AddApiAuthorization<ApplicationUser, MyDbContext>();
-			services.AddAuthentication()
-				.AddIdentityServerJwt();
 
 			services.AddCors(options =>
 			{
 				options.AddPolicy("CorsPolicy",
 					builder =>
 					{
-						builder.SetIsOriginAllowed(_ => true)
+						builder
 						.AllowAnyMethod()
 						.AllowAnyHeader()
+						.SetIsOriginAllowed(__ => true)
 						.AllowCredentials();
 					});
 			});
@@ -62,8 +59,6 @@ namespace rtchat_backend
 			app.UseRouting();
 
 			app.UseAuthentication();
-			//not sure if I need the one below
-			app.UseIdentityServer();
 
 			app.UseCors("CorsPolicy");
 
